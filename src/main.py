@@ -1,4 +1,3 @@
-
 import sys
 import os
 from os.path import isfile, isdir, join
@@ -7,6 +6,7 @@ from db import DBManager
 import reports
 import parse
 import shell
+
 
 """
 Utility function to get file paths for every
@@ -25,13 +25,13 @@ def getFilePaths(folderPath):
 
 
 """
-Loads the two files from the golden set of tagged 
+Loads the two files from the golden set of tagged
 papers and not applicable papers.
 
 Paths to the two files are set as default parameters
 so that they can be changed when called, if needed.
 """
-def loadGoldenSet(db, taggedPath = "../zoteroExport/taggedPapers.csv", notApplicablePath = "../zoteroExport/notApplicable.csv"):
+def loadGoldenSet(db, taggedPath="../zoteroExport/taggedPapers.csv", notApplicablePath="../zoteroExport/notApplicable.csv"):
 
     # Ensure that each file exists
     if isfile(taggedPath):
@@ -44,7 +44,7 @@ def loadGoldenSet(db, taggedPath = "../zoteroExport/taggedPapers.csv", notApplic
             # are different
             taggedEntries = parse.zoteroToIEEE(taggedEntries)
             naEntries = parse.zoteroToIEEE(naEntries)
-            
+
             db.putSearchResults(tagSearchDetail, taggedEntries)
             db.putSearchResults(naSearchDetail, naEntries)
         else:
@@ -84,13 +84,12 @@ def loadFile(db, filePath):
     else:
         pass
         # Throw an error or something
-    
 
 
 """
 Validates CSV files by sending files to parse.validateCSVfile
 
-Parameters: 
+Parameters:
     path: Path to a CSV file or a folder of CSV files
 
 Return:
@@ -101,7 +100,7 @@ def validateFolderCSV(path):
     # If a file path was given, only cleanse that file
     if isfile(path):
         contents = parse.validateCSVfile(path)
-        
+
         with open(path, 'w') as outFile:
             outFile.write(contents)
 
@@ -110,12 +109,11 @@ def validateFolderCSV(path):
         filePaths = getFilePaths(path)
         for f in filePaths:
             contents = parse.validateCSVfile(f)
-            
+
             with open(f, 'w') as outFile:
                 outFile.write(contents)
     else:
         pass
-
 
 
 """
@@ -164,25 +162,19 @@ def main():
             report = parse.reportToCSV(report)
             with open("author-report.csv", "w") as out:
                 out.write(report)
-
-
         elif command == "report-crossover":
             report = reports.generateReportCrossover(db)
             report = parse.reportToCSV(report)
             print(report)
-
         elif command == "report-by-year":
             report = reports.generateReportByYear(db)
             report = parse.reportToCSV(report)
             print(report)
-
         elif command == "report-by-authors":
             report = reports.generateAuthorReport(db)
             report = parse.reportToCSV(report)
             print(report)
-
         elif command == "compile-folder":
-
             if len(sys.argv) > 2:
                 path = sys.argv[2]
             else:
@@ -206,35 +198,28 @@ def main():
                 outFile.close()
             else:
                 print("The directory you entered was empty. So nothing happened.")
-
         elif command == "validateCSV":
             # For a given directory path,
             # traverses through each file and ensures
             # that they each follow valid CSV format
             path = sys.argv[2]
             validateFolderCSV(path)
-
         elif command == "load":
-            # Loads an entire folder of CSV files and the golden set 
+            # Loads an entire folder of CSV files and the golden set
             # into the database
 
             path = sys.argv[2]
             loadFolder(db, path)
             loadGoldenSet(db)
-
         elif command == "shell":
-
             # Run the shell
             shell.run(db)
-
-        else: 
+        else:
             print("Unsupported command. Please see README for supported operations.")
-        
         db.shutdown()
-        
     else:
         print("No commands entered. Please see README for supported operations.")
 
 
 if __name__ == "__main__":
-	main()
+    main()

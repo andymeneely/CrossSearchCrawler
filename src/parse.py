@@ -1,7 +1,7 @@
 
 
 """
-Checks if a character is valid ascii. 
+Checks if a character is valid ascii.
 
 This was made to deal with weird characters in the CSV data files.
 """
@@ -95,7 +95,7 @@ def parseFile(filePath):
     fieldNames = headerLine.replace('"', '').strip().split(',')
 
     contents = contents[2::]
-    
+
     # iterate and parse each line with parseCSV Line
     entries = []
     for line in contents:
@@ -135,7 +135,7 @@ def containsStopWords(entry):
 
 """
 Converts entries generated from Zotero exported files to be able to work with IEEE exported files.
-It does this by adding IEEE header names to the entry dictionaries with the same value as the 
+It does this by adding IEEE header names to the entry dictionaries with the same value as the
 corresponding Zotero header.
 """
 def zoteroToIEEE(zoteroEntries):
@@ -173,8 +173,8 @@ Parameters:
     report: a list of lists
 
 Returns:
-    content: a single string that in CSV format generated from report. 
-            Each top level list became a line and the sub lists' contents 
+    content: a single string that in CSV format generated from report.
+            Each top level list became a line and the sub lists' contents
             were separated by commas.
 """
 def reportToCSV(report):
@@ -295,7 +295,7 @@ def validateCSVLine(line):
     for i in range(1, (len(line)-1)):
         char = line[i]
         lastChar = line[(i-1)]
-        nextChar = line[(i+1)]        
+        nextChar = line[(i+1)]
 
         if char == '"':
             quoteCount += 1
@@ -326,20 +326,20 @@ Returns:
 
 """
 def validateCSVfile(filePath):
-	# Assumes that filePath has been checked to exist
-	print("Cleaning CSV for: " + filePath)
-	finalEntries = []
-	header = getCSVHeader(filePath)
-	finalEntries.append(header)
-	entries = resultsFileToLists(filePath)
-	finalEntries += entries
+    # Assumes that filePath has been checked to exist
+    print("Cleaning CSV for: " + filePath)
+    finalEntries = []
+    header = getCSVHeader(filePath)
+    finalEntries.append(header)
+    entries = resultsFileToLists(filePath)
+    finalEntries += entries
 
-	contents = ""
-	for entry in finalEntries:
-		entry = validateCSVLine(entry)
-		contents += entry + "\n"
+    contents = ""
+    for entry in finalEntries:
+        entry = validateCSVLine(entry)
+        contents += entry + "\n"
 
-	return contents
+    return contents
 
 
 """
@@ -354,22 +354,23 @@ Returns:
 """
 def compileFolder(filePaths):
 
-	finalEntries = []
+    finalEntries = []
 
-	header = parse.getCSVHeader(filePaths[0])
-	finalEntries.append(header)
-	for f in filePaths:
+    header = parse.getCSVHeader(filePaths[0])
+    finalEntries.append(header)
+    for f in filePaths:
         # Results file to lists leaves out the file headers and just gets the entries
-		entries = parse.resultsFileToLists(f)
-		finalEntries += entries
+        entries = parse.resultsFileToLists(f)
+        finalEntries += entries
 
-	contents = parse.linesToCSV(finalEntries)
+    contents = parse.linesToCSV(finalEntries)
 
-	return contents
+    return contents
 
 
 def main():
-	print("Sorry, this file doesn't have anything to run.")
-	
+    print("Sorry, this file doesn't have anything to run.")
+
+
 if __name__ == "__main__":
-	main()
+    main()

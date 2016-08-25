@@ -1,4 +1,3 @@
-
 from db import DBManager
 
 
@@ -7,12 +6,11 @@ Generates a report that shows the overlap between any
 two searches.
 """
 def generateReportCrossover(db):
-
     listTable = []
     searches = db.getSearches()
 
     # Setting up the first CSV line in the report
-    firstLine = ['Total', 'Total'] #Should be search name, total?
+    firstLine = ['Total', 'Total']  # Should be search name, total?
     for s in searches:
         firstLine.append(s[1])
 
@@ -28,10 +26,10 @@ def generateReportCrossover(db):
 
     for s in searches:
         # s[0] is the id of a search in the database
-        # s[1] is the text of the search query 
+        # s[1] is the text of the search query
         line = [s[1], str(len(db.getSearchResults(s[0])))]
         for other in searches:
-            # The function being called takes two search IDs and gets 
+            # The function being called takes two search IDs and gets
             # the number of overlapping publications
             line.append(str(len(db.getOverlappingResults(s[0], other[0]))))
         listTable.append(line)
@@ -40,14 +38,13 @@ def generateReportCrossover(db):
 
 
 """
-Generates a report showing the number of publications 
+Generates a report showing the number of publications
 for a search for each year.
 
 This function is essentially a printing function for the return
 value of DBManager.getSearchesByYear()
 """
 def generateReportByYear(db):
-    
     listTable = []
 
     years = {}
@@ -80,10 +77,9 @@ def generateReportByYear(db):
 
 
 """
-Generates a report for the number of contributing authors compared to each search.
+    Generates a report for the number of contributing authors compared to each search.
 """
 def generateAuthorReport(db):
-
     listTable = []
 
     numAuthors = len(db.getAuthors())
@@ -99,11 +95,13 @@ def generateAuthorReport(db):
 
     listTable.append(firstLine)
     listTable.append(secondLine)
-    
+
     return listTable
 
+
 def main():
-	pass
-	
+    pass
+
+
 if __name__ == "__main__":
-	main()
+    main()

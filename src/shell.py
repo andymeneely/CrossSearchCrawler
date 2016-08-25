@@ -61,7 +61,7 @@ def printYearlyOverlap(db, command):
     for year in range(1998, 2016):  # can go back to 1990, but IDS not found before 98 anyway!
         count, firstTotal, secondTotal = db.getOverlappingYearlyResults(searchA, searchB, year)
         percentage = "-"
-        if firstTotal + secondTotal > 0 :
+        if firstTotal + secondTotal > 0:
             percentage = str(round(((count / (firstTotal + secondTotal)) * 100), 2))
         print(str(year) + " | " + str(count) + " | " + str(firstTotal) + " | " + str(secondTotal) + " | " + percentage + " %")
 
@@ -146,13 +146,13 @@ def help():
 
 
 """
-The main shell of the shell. Entry point for all of the commands. 
+The main shell of the shell. Entry point for all of the commands.
 
 Parameters:
-	db: A DBManager object
+    db: A DBManager object
 
 Returns:
-	Nothing
+    Nothing
 """
 
 def run(db):
