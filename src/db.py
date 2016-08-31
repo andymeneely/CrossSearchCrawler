@@ -2,10 +2,8 @@ import sqlite3
 import os
 
 
-"""
-An class for handling all of the operations with the database.
-"""
 class DBManager:
+    """An class for handling all of the operations with the database."""
 
     """
     The constructor function of this object.
@@ -45,19 +43,23 @@ class DBManager:
         exists = False
 
         # Check if this search has been inserted yet
-        idSql = 'SELECT id FROM searches WHERE searchText="%s" AND site="%s";' %(search['query'], search['site'])
-        self.cursor.execute(idSql)
+        idSql = 'SELECT id ' \
+                'FROM searches ' \
+                'WHERE searchText=? AND site=?'
+        self.cursor.execute(idSql, (search['query'], search['site']))
         results = self.cursor.fetchall()
         if len(results) > 0:
             exists = True
 
         # If it doesn't exist, insert it
         if not exists:
-            sql = 'INSERT INTO searches (searchText, site) VALUES ( "%s", "%s");' %(search['query'], search['site'])
-            self.cursor.execute(sql)
+            sql = 'INSERT INTO searches(metric,searchText,site) VALUES (?,?,?)'
+            self.cursor.execute(
+                    sql, (search['metric'], search['query'], search['site'])
+                )
 
         # Get the ID
-        self.cursor.execute(idSql)
+        self.cursor.execute(idSql, (search['query'], search['site']))
         idVal = self.cursor.fetchone()
 
         return idVal[0]
@@ -68,18 +70,43 @@ class DBManager:
     def putEntry(self, entry):
         exists = False
 
-        idSql = 'SELECT id FROM publications WHERE title="%s" AND year="%s" AND doi="%s" AND isbn="%s" AND issn="%s"' % (entry['Document Title'], entry['Year'], entry['DOI'], entry["ISBN"], entry["ISSN"])
-        self.cursor.execute(idSql)
+        idSql = 'SELECT id ' \
+                'FROM publications ' \
+                'WHERE title=? AND year=? AND doi=? AND isbn=? AND issn=?'
+
+        self.cursor.execute(
+                idSql,
+                (
+                    entry['Document Title'], entry['Year'], entry['DOI'],
+                    entry['ISBN'], entry['ISSN']
+                )
+            )
         results = self.cursor.fetchall()
 
         if len(results) > 0:
             exists = True
 
         if not exists:
-            sql = 'INSERT INTO publications (title, year, doi, isbn, issn, url, startpage, endpage) VALUES ("%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s");' % (entry['Document Title'], entry['Year'], entry['DOI'], entry['ISBN'], entry['ISSN'], entry["PDF Link"], entry["Start Page"], entry["End Page"])
-            self.cursor.execute(sql)
+            sql = 'INSERT INTO publications(' \
+                  '  title,year,doi,isbn,issn,url,startpage,endpage' \
+                  ') VALUES (?,?,?,?,?,?,?,?)'
 
-        self.cursor.execute(idSql)
+            self.cursor.execute(
+                    sql,
+                    (
+                        entry['Document Title'], entry['Year'], entry['DOI'],
+                        entry['ISBN'], entry['ISSN'], entry['PDF Link'],
+                        entry['Start Page'], entry['End Page']
+                    )
+                )
+
+        self.cursor.execute(
+                idSql,
+                (
+                    entry['Document Title'], entry['Year'], entry['DOI'],
+                    entry['ISBN'], entry['ISSN']
+                )
+            )
         idVal = self.cursor.fetchone()
 
         for author in entry["Authors"].split(";"):
@@ -95,16 +122,16 @@ class DBManager:
         exists = False
 
         # Check if this search has been inserted yet
-        idSql = 'SELECT id FROM authors WHERE name="%s";' %(authorName)
-        self.cursor.execute(idSql)
+        idSql = 'SELECT id FROM authors WHERE name=?'
+        self.cursor.execute(idSql, (authorName,))
         results = self.cursor.fetchall()
         if len(results) > 0:
             exists = True
 
         # If it doesn't exist, insert it
         if not exists:
-            sql = 'INSERT INTO authors(name) VALUES ("%s");' %(authorName)
-            self.cursor.execute(sql)
+            sql = 'INSERT INTO authors(name) VALUES (?)'
+            self.cursor.execute(sql, (authorName,))
 
         # Get the ID
         self.cursor.execute(idSql)
@@ -117,39 +144,44 @@ class DBManager:
     """
     def putSearchLink(self, searchID, entryID):
         exists = False
-        idSql = 'SELECT searchID, pubID FROM searchpublink WHERE searchID="%s" AND pubID="%s";' % (searchID, entryID)
-        self.cursor.execute(idSql)
+        idSql = 'SELECT searchID, pubID ' \
+                'FROM searchpublink ' \
+                'WHERE searchID=? AND pubID=?'
+        self.cursor.execute(idSql, (searchID, entryID))
         results = self.cursor.fetchall()
         if len(results) > 0:
             exists = True
 
         if not exists:
-            putSql = 'INSERT INTO searchpublink (searchID, pubID) VALUES ("%s", "%s");' % (searchID, entryID)
-            self.cursor.execute(putSql)
+            putSql = 'INSERT INTO searchpublink(searchID,pubID) VALUES (?,?)'
+            self.cursor.execute(putSql, (searchID, entryID))
 
     """
     Enters the IDs of a author and publication pair.
     """
     def putAuthorPubLink(self, authorID, pubID):
         exists = False
-        idSql = 'SELECT authorID, pubID FROM authorpublink WHERE authorID="%s" AND pubID="%s";' % (authorID, pubID)
-        self.cursor.execute(idSql)
+        idSql = 'SELECT authorID, pubID ' \
+                'FROM authorpublink ' \
+                'WHERE authorID=? AND pubID=?'
+        self.cursor.execute(idSql, (authorID, pubID))
         results = self.cursor.fetchall()
         if len(results) > 0:
             exists = True
 
         if not exists:
-            putSql = 'INSERT INTO authorpublink (authorID, pubID) VALUES ("%s", "%s");' % (authorID, pubID)
-            self.cursor.execute(putSql)
+            putSql = 'INSERT INTO authorpublink(authorID,pubID) VALUES (?,?)'
+            self.cursor.execute(putSql, (authorID, pubID))
 
     def getSearches(self):
-        sql = "SELECT id, searchText from searches order by id ASC;"
+        sql = 'SELECT id, searchText FROM searches ORDER BY id ASC'
         self.cursor.execute(sql)
 
         return self.cursor.fetchall()
 
     def getPublications(self):
-        sql = "SELECT id, title, year, doi, startpage, endpage from publications;"
+        sql = 'SELECT id, title, year, doi, startpage, endpage ' \
+              'FROM publications'
         self.cursor.execute(sql)
 
         return self.cursor.fetchall()
@@ -173,32 +205,34 @@ class DBManager:
         return self.cursor.fetchall()
 
     def getSearchResults(self, searchID):
-        sql = "SELECT pubID from searchpublink where searchID=%s;" % (searchID)
-        self.cursor.execute(sql)
+        sql = 'SELECT pubID FROM searchpublink WHERE searchID=?'
+        self.cursor.execute(sql, (searchID, ))
         results = self.cursor.fetchall()
 
         return results
 
     def getPubById(self, pubID):
-        sql = "SELECT id, title, year, doi from publications where id=%s" % (pubID)
-        self.cursor.execute(sql)
+        sql = 'SELECT id, title, year, doi FROM publications WHERE id=?'
+        self.cursor.execute(sql, (pubID, ))
         result = self.cursor.fetchall()[0]
 
         return result
 
-    """
-    This function returns a grouping of searches by year.
-
-    The year value is in the publications table. The search query text is in the searches table.
-
-    There is probably a more efficient way to do this in sql but I don't know how to write it.
-    """
     def getSearchesByYear(self):
+        """This function returns a grouping of searches by year.
+
+        The year value is in the publications table. The search query text is
+        in the searches table. There is probably a more efficient way to do
+        this in sql but I don't know how to write it.
+        """
         searches = self.getSearches()
         links = self.getSearchPubLinks()
         pubs = self.getPublications()
 
-        yearCountSQL = "SELECT count(*) FROM publications INNER JOIN searchpublink ON publications.id=searchpublink.pubID WHERE searchpublink.searchID=%s AND publications.year=%s"
+        yearCountSQL = 'SELECT count(*) ' \
+                       'FROM publications INNER JOIN searchpublink ' \
+                       '  ON publications.id=searchpublink.pubID ' \
+                       'WHERE searchpublink.searchID=? AND publications.year=?'
 
         years = []
         y = 1990
@@ -213,8 +247,7 @@ class DBManager:
             searchesByYear[searchText] = {}
 
             for y in years:
-                sql = yearCountSQL %(searchID, y)
-                self.cursor.execute(sql)
+                self.cursor.execute(yearCountSQL, (searchID, y))
                 count = self.cursor.fetchone()[0]
                 searchesByYear[searchText][y] = count
 
@@ -241,11 +274,10 @@ class DBManager:
 
         return searchCounts
 
-    """
-    Returns a list of publication IDs that are mapped to both searchIDs in searchpublink
-    """
     def getOverlappingResults(self, searchID1, searchID2):
-
+        """Returns a list of publication IDs that are mapped to both searchIDs
+        in searchpublink
+        """
         results1 = self.getSearchResults(searchID1)
 
         results2 = self.getSearchResults(searchID2)
@@ -257,11 +289,10 @@ class DBManager:
 
         return results
 
-    """
-    Returns a count of overlapping results for 3 categories. Each category is an array of searchID's
-    """
     def getCategoryOverlap(self, category1, category2, category3):
-
+        """Returns a count of overlapping results for 3 categories. Each
+        category is an array of searchID's
+        """
         resultsA = []
         resultsB = []
         resultsC = []
@@ -287,25 +318,34 @@ class DBManager:
             if r in resultsC:
                 BCoverlap.append(r)
         print("Overlap results")
-        print("A only: " + str(len(resultsA)) + ", B only: " + str(len(resultsB)) + ", C only: " + str(len(resultsC)))
-        print("A & B: " + str(len(ABoverlap)) + ", A & C: " + str(len(ACoverlap)) + ", B & C: " + str(len(BCoverlap)) +", A & B & C: " + str(len(ABCoverlap)))
+        print(
+            "A only: " + str(len(resultsA)) + ", B only: " +
+            str(len(resultsB)) + ", C only: " + str(len(resultsC))
+        )
+        print(
+            "A & B: " + str(len(ABoverlap)) + ", A & C: " +
+            str(len(ACoverlap)) + ", B & C: " + str(len(BCoverlap)) +
+            ", A & B & C: " + str(len(ABCoverlap))
+        )
 
         return
 
-    """
-    Returns a list of publication IDs that are mapped to both given searchIDs in searchpublink for a given year
-    """
     def getOverlappingYearlyResults(self, searchID1, searchID2, year):
+        """Returns a list of publication IDs that are mapped to both given
+        searchIDs in searchpublink for a given year
+        """
         overlap = self.getOverlappingResults(searchID1, searchID2)
         total1 = self.getSearchResults(searchID1)
         total2 = self.getSearchResults(searchID2)
         firstResults = []
         secondResults = []
-        for pubID in total1: #gets total publications for searchID1. Probably not efficient
+        # gets total publications for searchID1. Probably not efficient
+        for pubID in total1:
             sql = "SELECT year from publications where id=%s;" % (pubID)
             self.cursor.execute(sql)
             firstResults += self.cursor.fetchall()
-        for pubID in total2: #gets total publications for searchID2. Probably not efficient
+        # gets total publications for searchID2. Probably not efficient
+        for pubID in total2:
             sql = "SELECT year from publications where id=%s;" % (pubID)
             self.cursor.execute(sql)
             secondResults += self.cursor.fetchall()
@@ -315,26 +355,29 @@ class DBManager:
             self.cursor.execute(sql)
             results += self.cursor.fetchall()
         yearFormat = ((str(year)),)
-        return [results.count(yearFormat), firstResults.count(yearFormat), secondResults.count(yearFormat)]
+        return [
+                results.count(yearFormat), firstResults.count(yearFormat),
+                secondResults.count(yearFormat)
+            ]
 
-    """
-    Gets the count of publications that overlap for the given list of searchIDs
-
-    Parameters:
-        self: this DBManager
-        searchIDs: a list of search IDs to get the overlap of
-
-    Returns:
-        results: a list of publication entries that were linked to all IDs in searchIDs
-    """
     def getOverlapIDs(self, searchIDs):
+        """Gets the count of publications that overlap for list of searchIDs
+
+        Parameters:
+            self: this DBManager
+            searchIDs: a list of search IDs to get the overlap of
+
+        Returns:
+            results: a list of publication entries that were linked to all IDs
+            in searchIDs
+        """
 
         if len(searchIDs) > 0:
-            sql = "select pubID from searchpublink where searchID=%s " % (searchIDs[0])
+            sql = 'SELECT pubID FROM searchpublink WHERE searchID=?'
             for i in range(1, len(searchIDs)):
-                sql += "intersect select pubID from searchpublink where searchID=%s " % (searchIDs[i])
-            sql += ";"
-            self.cursor.execute(sql)
+                sql += 'INTERSECT ' \
+                        'SELECT pubID FROM searchpublink WHERE searchID=?'
+            self.cursor.execute(sql, *searchIDs)
 
             return self.cursor.fetchall()
 
