@@ -134,7 +134,7 @@ class DBManager:
             self.cursor.execute(sql, (authorName,))
 
         # Get the ID
-        self.cursor.execute(idSql)
+        self.cursor.execute(idSql, (authorName,))
         idVal = self.cursor.fetchone()
 
         return idVal[0]
