@@ -377,7 +377,7 @@ class DBManager:
             for i in range(1, len(searchIDs)):
                 sql += 'INTERSECT ' \
                         'SELECT pubID FROM searchpublink WHERE searchID=?'
-            self.cursor.execute(sql, *searchIDs)
+            self.cursor.execute(sql, searchIDs)
 
             return self.cursor.fetchall()
 
